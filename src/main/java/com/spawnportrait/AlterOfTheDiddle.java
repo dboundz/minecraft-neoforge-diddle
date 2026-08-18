@@ -6,9 +6,13 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -72,61 +76,65 @@ public final class AlterOfTheDiddle {
         return origin.relative(facing, 2).above(HEIGHT - 1);
     }
 
-    public static void place(ServerLevel level, BlockPos origin, Direction facing, Direction left) {
+    public static void place(
+            WorldGenLevel level,
+            BlockPos origin,
+            Direction facing,
+            Direction left,
+            BoundingBox chunkBox,
+            RandomSource random
+    ) {
         Direction right = left.getOpposite();
 
         for (int across = -HALF_WIDTH; across <= HALF_WIDTH; across++) {
             for (int front = 0; front < DEPTH; front++) {
-                set(level, at(origin, left, facing, across, 0, front), foundationAt(across, front));
+                set(level, chunkBox, at(origin, left, facing, across, 0, front), foundationAt(across, front));
             }
         }
 
         for (int across = -HALF_WIDTH; across <= HALF_WIDTH; across++) {
             for (int front = 0; front < DEPTH - 1; front++) {
-                set(level, at(origin, left, facing, across, 1, front), midAt(across, front));
+                set(level, chunkBox, at(origin, left, facing, across, 1, front), midAt(across, front));
             }
         }
 
         for (int across = -HALF_WIDTH + 1; across <= HALF_WIDTH - 1; across++) {
             for (int front = 0; front < DEPTH - 2; front++) {
-                set(level, at(origin, left, facing, across, 2, front), riserAt(across, front));
+                set(level, chunkBox, at(origin, left, facing, across, 2, front), riserAt(across, front));
             }
         }
 
         BlockState stairs = Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState()
                 .setValue(StairBlock.FACING, facing);
         for (int across = -3; across <= 3; across++) {
-            set(level, at(origin, left, facing, across, 1, DEPTH - 1), stairs);
+            set(level, chunkBox, at(origin, left, facing, across, 1, DEPTH - 1), stairs);
         }
 
-        set(level, at(origin, left, facing, -HALF_WIDTH + 1, 2, 1), PILLAR);
-        set(level, at(origin, left, facing, HALF_WIDTH - 1, 2, 1), PILLAR);
-        set(level, at(origin, left, facing, -2, 2, DEPTH - 3), PINK);
-        set(level, at(origin, left, facing, 2, 2, DEPTH - 3), PINK);
+        set(level, chunkBox, at(origin, left, facing, -HALF_WIDTH + 1, 2, 1), PILLAR);
+        set(level, chunkBox, at(origin, left, facing, HALF_WIDTH - 1, 2, 1), PILLAR);
+        set(level, chunkBox, at(origin, left, facing, -2, 2, DEPTH - 3), PINK);
+        set(level, chunkBox, at(origin, left, facing, 2, 2, DEPTH - 3), PINK);
 
         for (int across = -2; across <= 2; across++) {
             for (int front = 0; front <= 2; front++) {
-                set(level, at(origin, left, facing, across, 3, front), QUARTZ);
+                set(level, chunkBox, at(origin, left, facing, across, 3, front), QUARTZ);
             }
         }
 
         BlockPos chestPos = chestPos(origin, facing);
-        set(level, chestPos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing));
-        fillChest(level, chestPos);
+        if (set(level, chunkBox, chestPos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing))) {
+            fillChest(level, chestPos, random);
+        }
 
-        set(level, chestPos.relative(left), Blocks.SOUL_LANTERN.defaultBlockState());
-        set(level, chestPos.relative(right), Blocks.SOUL_LANTERN.defaultBlockState());
+        set(level, chunkBox, chestPos.relative(left), Blocks.SOUL_LANTERN.defaultBlockState());
+        set(level, chunkBox, chestPos.relative(right), Blocks.SOUL_LANTERN.defaultBlockState());
 
         BlockPos plaque = at(origin, left, facing, 0, 2, DEPTH - 3);
         BlockPos signPos = plaque.relative(facing);
-        set(level, signPos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing));
-        if (level.getBlockEntity(signPos) instanceof SignBlockEntity sign) {
-            SignText text = new SignText()
-                    .setMessage(0, Component.literal("Alter of the"))
-                    .setMessage(1, Component.literal("Diddle"))
-                    .setColor(DyeColor.PINK)
-                    .setHasGlowingText(true);
-            sign.setText(text, true);
+        if (set(level, chunkBox, signPos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing))) {
+            if (level.getBlockEntity(signPos) instanceof SignBlockEntity sign) {
+                writeSignText(level, sign);
+            }
         }
     }
 
@@ -159,7 +167,20 @@ public final class AlterOfTheDiddle {
         return QUARTZ;
     }
 
-    private static void fillChest(ServerLevel level, BlockPos chestPos) {
+    private static void writeSignText(WorldGenLevel level, SignBlockEntity sign) {
+        SignText text = new SignText()
+                .setMessage(0, Component.literal("Alter of the"))
+                .setMessage(1, Component.literal("Diddle"))
+                .setColor(DyeColor.PINK)
+                .setHasGlowingText(true);
+        CompoundTag tag = new CompoundTag();
+        tag.store("front_text", SignText.DIRECT_CODEC, text);
+        tag.putBoolean("is_waxed", true);
+        sign.loadCustomOnly(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
+        sign.setChanged();
+    }
+
+    private static void fillChest(WorldGenLevel level, BlockPos chestPos, RandomSource random) {
         if (!(level.getBlockEntity(chestPos) instanceof ChestBlockEntity chest)) {
             return;
         }
@@ -170,12 +191,11 @@ public final class AlterOfTheDiddle {
                         .set(DataComponents.CUSTOM_NAME, Component.literal(NAME))
                         .build()
         );
-        chest.setItem(CHEST_SLOT, randomOffering(level));
+        chest.setItem(CHEST_SLOT, randomOffering(level, random));
         chest.setChanged();
     }
 
-    private static ItemStack randomOffering(ServerLevel level) {
-        RandomSource random = level.getRandom();
+    private static ItemStack randomOffering(WorldGenLevel level, RandomSource random) {
         ItemStack stack = new ItemStack(OFFERINGS[random.nextInt(OFFERINGS.length)]);
         level.registryAccess()
                 .lookupOrThrow(Registries.ENCHANTMENT)
@@ -193,7 +213,11 @@ public final class AlterOfTheDiddle {
         return origin.relative(left, across).above(y).relative(front, depth);
     }
 
-    private static void set(ServerLevel level, BlockPos pos, BlockState state) {
-        level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
+    private static boolean set(WorldGenLevel level, BoundingBox chunkBox, BlockPos pos, BlockState state) {
+        if (!chunkBox.isInside(pos)) {
+            return false;
+        }
+        level.setBlock(pos, state, Block.UPDATE_CLIENTS);
+        return true;
     }
 }

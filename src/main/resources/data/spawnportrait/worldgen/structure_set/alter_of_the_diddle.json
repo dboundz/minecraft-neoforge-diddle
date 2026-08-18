@@ -1,0 +1,20 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 351728941,
+    "separation": 20,
+    "spacing": 80,
+    "spread_type": "linear",
+    "frequency": 0.03,
+    "exclusion_zone": {
+      "chunk_count": 16,
+      "other_set": "minecraft:woodland_mansions"
+    }
+  },
+  "structures": [
+    {
+      "structure": "spawnportrait:alter_of_the_diddle",
+      "weight": 1
+    }
+  ]
+}

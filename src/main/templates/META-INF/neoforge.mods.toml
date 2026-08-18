@@ -5,7 +5,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 description='''
-Places a 2D block-pixel portrait in front of you whenever you spawn or respawn.
+A rare Overworld Alter of the Diddle: a block-pixel mural, a named chest, and a looping track.
 '''
 
 [[dependencies.${mod_id}]]

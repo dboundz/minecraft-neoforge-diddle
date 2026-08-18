@@ -1,0 +1,70 @@
+package com.spawnportrait;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
+
+public class AlterOfTheDiddlePiece extends StructurePiece {
+    private final BlockPos origin;
+    private final Direction facing;
+
+    public AlterOfTheDiddlePiece(BlockPos origin, Direction facing) {
+        super(ModStructures.ALTER_OF_THE_DIDDLE_PIECE.get(), 0, boundingBox(origin, facing));
+        this.origin = origin;
+        this.facing = facing;
+        this.setOrientation(facing);
+    }
+
+    public AlterOfTheDiddlePiece(CompoundTag tag) {
+        super(ModStructures.ALTER_OF_THE_DIDDLE_PIECE.get(), tag);
+        this.origin = tag.read("Origin", BlockPos.CODEC).orElseGet(this.boundingBox::getCenter);
+        this.facing = tag.read("Facing", Direction.CODEC).orElse(Direction.SOUTH);
+    }
+
+    public BlockPos origin() {
+        return this.origin;
+    }
+
+    static BoundingBox boundingBox(BlockPos origin, Direction facing) {
+        Direction left = facing.getCounterClockWise();
+        Direction right = left.getOpposite();
+        int halfWidth = PortraitPattern.WIDTH / 2;
+        BlockPos leftBack = origin.relative(left, halfWidth);
+        BlockPos rightFront = origin
+                .relative(right, halfWidth - 1)
+                .relative(facing, AlterOfTheDiddle.DEPTH - 1);
+        int minX = Math.min(leftBack.getX(), rightFront.getX());
+        int maxX = Math.max(leftBack.getX(), rightFront.getX());
+        int minZ = Math.min(leftBack.getZ(), rightFront.getZ());
+        int maxZ = Math.max(leftBack.getZ(), rightFront.getZ());
+        int maxY = origin.getY() + AlterOfTheDiddle.HEIGHT + PortraitPattern.HEIGHT - 1;
+        return new BoundingBox(minX, origin.getY(), minZ, maxX, maxY, maxZ);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
+        tag.store("Origin", BlockPos.CODEC, this.origin);
+        tag.store("Facing", Direction.CODEC, this.facing);
+    }
+
+    @Override
+    public void postProcess(
+            WorldGenLevel level,
+            StructureManager structureManager,
+            ChunkGenerator generator,
+            RandomSource random,
+            BoundingBox chunkBB,
+            ChunkPos chunkPos,
+            BlockPos referencePos
+    ) {
+        PortraitPlacer.place(level, this.origin, this.facing, chunkBB, random);
+    }
+}

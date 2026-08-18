@@ -4,14 +4,10 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 @Mod(SpawnPortraitMod.MOD_ID)
@@ -21,8 +17,10 @@ public class SpawnPortraitMod {
 
     public SpawnPortraitMod(IEventBus modEventBus, ModContainer modContainer) {
         ModSounds.SOUNDS.register(modEventBus);
+        ModStructures.STRUCTURE_TYPES.register(modEventBus);
+        ModStructures.PIECE_TYPES.register(modEventBus);
         modEventBus.addListener(this::registerPayloads);
-        NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(PortraitSoundTracker.class);
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
@@ -30,26 +28,5 @@ public class SpawnPortraitMod {
                 PlayPortraitSoundPayload.TYPE,
                 PlayPortraitSoundPayload.STREAM_CODEC
         );
-    }
-
-    @SubscribeEvent
-    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        schedulePlace(event.getEntity());
-    }
-
-    @SubscribeEvent
-    public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        schedulePlace(event.getEntity());
-    }
-
-    private static void schedulePlace(Player player) {
-        if (!(player instanceof ServerPlayer serverPlayer)) {
-            return;
-        }
-        var server = serverPlayer.level().getServer();
-        if (server == null) {
-            return;
-        }
-        server.execute(() -> PortraitPlacer.placeBehindPlayer(serverPlayer));
     }
 }

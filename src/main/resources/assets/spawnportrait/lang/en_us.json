@@ -1,3 +1,4 @@
 {
-  "fml.menu.mods.info.description.spawnportrait": "Places a 2D block-pixel portrait in front of you whenever you spawn or respawn."
+  "fml.menu.mods.info.description.spawnportrait": "A rare Overworld Alter of the Diddle: a block-pixel mural, a named chest, and a looping track.",
+  "structure.spawnportrait.alter_of_the_diddle": "Alter of the Diddle"
 }

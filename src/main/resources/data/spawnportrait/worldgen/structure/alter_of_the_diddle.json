@@ -1,0 +1,6 @@
+{
+  "type": "spawnportrait:alter_of_the_diddle",
+  "biomes": "#spawnportrait:has_structure/alter_of_the_diddle",
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}
