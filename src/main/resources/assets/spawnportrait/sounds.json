@@ -1,0 +1,11 @@
+{
+  "diddly": {
+    "sounds": [
+      {
+        "name": "spawnportrait:diddly",
+        "stream": true,
+        "attenuation_distance": 320
+      }
+    ]
+  }
+}
