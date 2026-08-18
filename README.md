@@ -1,6 +1,13 @@
 # Spawn Portrait
 
-A NeoForge 26.2 Minecraft mod that places a 2D block-pixel portrait in front of you whenever you join a world or respawn.
+A NeoForge 26.2 Minecraft mod that places a 2D block-pixel portrait behind you whenever you join a world or respawn.
+
+## Download
+
+- [spawnportrait-1.0.0.jar](https://github.com/dboundz/minecraft-neoforge-diddle/raw/main/dist/spawnportrait-1.0.0.jar)
+- [spawnportrait-1.0.0.zip](https://github.com/dboundz/minecraft-neoforge-diddle/raw/main/dist/spawnportrait-1.0.0.zip) (jar plus a short install note)
+
+Needs Minecraft **26.2** and [NeoForge 26.2](https://neoforged.net/). Put the jar in `.minecraft/mods` and launch the NeoForge 26.2 profile. On a server, the host and every player need the same jar.
 
 ## Requirements
 
