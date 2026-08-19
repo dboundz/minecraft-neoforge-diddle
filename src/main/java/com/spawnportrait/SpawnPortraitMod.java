@@ -24,7 +24,7 @@ public class SpawnPortraitMod {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1").playToClient(
+        event.registrar("2").playToClient(
                 PlayPortraitSoundPayload.TYPE,
                 PlayPortraitSoundPayload.STREAM_CODEC
         );

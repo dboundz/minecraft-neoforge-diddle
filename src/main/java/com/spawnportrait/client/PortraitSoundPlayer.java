@@ -17,4 +17,20 @@ public final class PortraitSoundPlayer {
         current = new PortraitLoopSound(pos);
         manager.play(current);
     }
+
+    public static void stop() {
+        if (current == null) {
+            return;
+        }
+        Minecraft.getInstance().getSoundManager().stop(current);
+        current = null;
+    }
+
+    public static void apply(BlockPos pos, boolean playing) {
+        if (playing) {
+            play(pos);
+        } else {
+            stop();
+        }
+    }
 }

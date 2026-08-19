@@ -1,6 +1,6 @@
 package com.spawnportrait;
 
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -21,8 +22,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class PortraitSoundTracker {
     private static final int RANGE = 320;
     private static final int CHUNK_RADIUS = (RANGE >> 4) + 2;
-    private static final int CHECK_INTERVAL = 40;
-    private static final Set<UUID> PLAYING = ConcurrentHashMap.newKeySet();
+    private static final int SCAN_INTERVAL = 40;
+    private static final int CHEST_INTERVAL = 5;
+
+    private static final Map<UUID, TrackedAlter> NEARBY = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> PLAYING = new ConcurrentHashMap<>();
+
+    private record TrackedAlter(BlockPos origin, BlockPos chestPos) {
+    }
 
     private PortraitSoundTracker() {
     }
@@ -32,30 +39,54 @@ public final class PortraitSoundTracker {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (player.tickCount % CHECK_INTERVAL != 0) {
-            return;
-        }
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
 
-        BlockPos nearby = findNearbyOrigin(level, player.blockPosition());
-        if (nearby != null) {
-            if (PLAYING.add(player.getUUID())) {
-                PacketDistributor.sendToPlayer(player, new PlayPortraitSoundPayload(nearby));
+        UUID id = player.getUUID();
+        if (player.tickCount % SCAN_INTERVAL == 0) {
+            TrackedAlter found = findNearbyAlter(level, player.blockPosition());
+            if (found == null) {
+                NEARBY.remove(id);
+            } else {
+                NEARBY.put(id, found);
             }
-        } else {
-            PLAYING.remove(player.getUUID());
+        } else if (player.tickCount % CHEST_INTERVAL != 0) {
+            return;
         }
+
+        TrackedAlter tracked = NEARBY.get(id);
+        boolean shouldPlay = tracked != null
+                && player.blockPosition().closerThan(tracked.origin(), RANGE)
+                && chestHasItem(level, tracked.chestPos());
+        setPlaying(player, tracked != null ? tracked.origin() : player.blockPosition(), shouldPlay);
     }
 
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        PLAYING.remove(event.getEntity().getUUID());
+        UUID id = event.getEntity().getUUID();
+        NEARBY.remove(id);
+        PLAYING.remove(id);
     }
 
-    private static BlockPos findNearbyOrigin(ServerLevel level, BlockPos playerPos) {
-        var structure = level.registryAccess()
+    private static void setPlaying(ServerPlayer player, BlockPos pos, boolean shouldPlay) {
+        Boolean wasPlaying = PLAYING.put(player.getUUID(), shouldPlay);
+        if (wasPlaying != null && wasPlaying == shouldPlay) {
+            return;
+        }
+        PacketDistributor.sendToPlayer(player, new PlayPortraitSoundPayload(pos, shouldPlay));
+    }
+
+    private static boolean chestHasItem(ServerLevel level, BlockPos chestPos) {
+        ChunkPos chestChunk = ChunkPos.containing(chestPos);
+        if (level.getChunkSource().getChunkNow(chestChunk.x(), chestChunk.z()) == null) {
+            return false;
+        }
+        return level.getBlockEntity(chestPos) instanceof ChestBlockEntity chest && !chest.isEmpty();
+    }
+
+    private static TrackedAlter findNearbyAlter(ServerLevel level, BlockPos playerPos) {
+        Structure structure = level.registryAccess()
                 .lookupOrThrow(Registries.STRUCTURE)
                 .get(ModStructures.ALTER_OF_THE_DIDDLE_KEY)
                 .map(holder -> holder.value())
@@ -77,9 +108,9 @@ public final class PortraitSoundTracker {
                     if (!start.isValid()) {
                         continue;
                     }
-                    BlockPos origin = originOf(start);
-                    if (origin != null && playerPos.closerThan(origin, RANGE)) {
-                        return origin;
+                    AlterOfTheDiddlePiece piece = pieceOf(start);
+                    if (piece != null && playerPos.closerThan(piece.origin(), RANGE)) {
+                        return new TrackedAlter(piece.origin(), piece.chestPos());
                     }
                 }
             }
@@ -87,12 +118,12 @@ public final class PortraitSoundTracker {
         return null;
     }
 
-    private static BlockPos originOf(StructureStart start) {
+    private static AlterOfTheDiddlePiece pieceOf(StructureStart start) {
         for (StructurePiece piece : start.getPieces()) {
             if (piece instanceof AlterOfTheDiddlePiece diddle) {
-                return diddle.origin();
+                return diddle;
             }
         }
-        return start.getBoundingBox().getCenter();
+        return null;
     }
 }

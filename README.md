@@ -1,8 +1,8 @@
 # Spawn Portrait
 
-A NeoForge 26.2 Minecraft mod that plants a rare **Alter of the Diddle** — a 2D block-pixel mural on a named pedestal — in the Overworld.
+Far from any hearth, in lands the maps leave blank, a quartz shrine waits. Those who find the **Alter of the Diddle** and leave an offering will hear a song that should not be. Empty the chest, and the melody dies as though it never was.
 
-It does **not** appear at spawn. It generates in newly created chunks at woodland-mansion rarity, using a different roll so it never shares mansion spots or dark-forest biomes.
+A NeoForge 26.2 Minecraft mod. It does **not** appear at spawn. The Alter generates in newly created Overworld chunks at woodland-mansion rarity, using a different roll so it never shares mansion spots or dark-forest biomes.
 
 ## Download
 
@@ -17,7 +17,7 @@ Needs Minecraft **26.2** and [NeoForge 26.2](https://neoforged.net/). Put the ja
 /locate structure spawnportrait:alter_of_the_diddle
 ```
 
-Walk within about 320 blocks and the looping track starts. The chest always holds one random enchanted armor piece or weapon.
+Walk within about 320 blocks and the looping track starts while the altar chest has anything in it. Take the item out and the sound stops; put something back and it starts again. The generated offering is one random enchanted armor piece or weapon.
 
 Existing worlds only get Alters in **new** chunks.
 

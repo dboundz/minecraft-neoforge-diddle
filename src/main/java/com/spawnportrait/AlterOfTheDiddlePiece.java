@@ -33,6 +33,14 @@ public class AlterOfTheDiddlePiece extends StructurePiece {
         return this.origin;
     }
 
+    public Direction facing() {
+        return this.facing;
+    }
+
+    public BlockPos chestPos() {
+        return AlterOfTheDiddle.chestPos(this.origin, this.facing);
+    }
+
     static BoundingBox boundingBox(BlockPos origin, Direction facing) {
         Direction left = facing.getCounterClockWise();
         Direction right = left.getOpposite();

@@ -16,6 +16,6 @@ public class SpawnPortraitClient {
 
     private void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
         event.register(PlayPortraitSoundPayload.TYPE, (payload, context) ->
-                PortraitSoundPlayer.play(payload.pos()));
+                PortraitSoundPlayer.apply(payload.pos(), payload.playing()));
     }
 }
