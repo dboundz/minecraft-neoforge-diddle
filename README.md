@@ -2,6 +2,8 @@
 
 Far from any hearth, in lands the maps leave blank, a quartz shrine waits. Those who find the **Alter of the Diddle** and leave an offering will hear a song that should not be. Empty the chest, and the melody dies as though it never was.
 
+<img width="966" height="620" alt="Screenshot 2026-08-19 at 7 49 56 AM" src="https://github.com/user-attachments/assets/4231c42f-e722-4616-8a34-413fc81a0ea1" />
+
 A NeoForge 26.2 Minecraft mod. It does **not** appear at spawn. The Alter generates in newly created Overworld chunks at woodland-mansion rarity, using a different roll so it never shares mansion spots or dark-forest biomes.
 
 ## Download
