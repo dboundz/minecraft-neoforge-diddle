@@ -1,6 +1,5 @@
 package com.spawnportrait;
 
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -154,27 +153,27 @@ public final class PortraitPattern {
             case 'N' -> Blocks.SAND;
             case 'A' -> Blocks.SMOOTH_SANDSTONE;
             case 'B' -> Blocks.BIRCH_PLANKS;
-            case 'F' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.WHITE);
+            case 'F' -> Blocks.WHITE_TERRACOTTA;
             case 'T' -> Blocks.TERRACOTTA;
-            case 'o' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.ORANGE);
+            case 'o' -> Blocks.ORANGE_TERRACOTTA;
             case 'J' -> Blocks.JUNGLE_PLANKS;
-            case 'r' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.RED);
-            case 'b' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.BROWN);
+            case 'r' -> Blocks.RED_TERRACOTTA;
+            case 'b' -> Blocks.BROWN_TERRACOTTA;
             case 'g' -> Blocks.GRANITE;
-            case 'X' -> Blocks.CONCRETE.pick(DyeColor.BLACK);
+            case 'X' -> Blocks.BLACK_CONCRETE;
             case 'V' -> Blocks.OBSIDIAN;
-            case 'k' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.BLACK);
-            case 'G' -> Blocks.CONCRETE.pick(DyeColor.GRAY);
-            case 'L' -> Blocks.CONCRETE.pick(DyeColor.LIGHT_GRAY);
-            case 'W' -> Blocks.CONCRETE.pick(DyeColor.WHITE);
+            case 'k' -> Blocks.BLACK_TERRACOTTA;
+            case 'G' -> Blocks.GRAY_CONCRETE;
+            case 'L' -> Blocks.LIGHT_GRAY_CONCRETE;
+            case 'W' -> Blocks.WHITE_CONCRETE;
             case 'S' -> Blocks.SPRUCE_PLANKS;
             case 'D' -> Blocks.DARK_OAK_PLANKS;
             case 'd' -> Blocks.DEEPSLATE;
-            case 'l' -> Blocks.WOOL.pick(DyeColor.LIGHT_GRAY);
+            case 'l' -> Blocks.LIGHT_GRAY_WOOL;
             case 'i' -> Blocks.DIORITE;
-            case 'w' -> Blocks.WOOL.pick(DyeColor.WHITE);
+            case 'w' -> Blocks.WHITE_WOOL;
             case 'c' -> Blocks.CALCITE;
-            case 'p' -> Blocks.DYED_TERRACOTTA.pick(DyeColor.PINK);
+            case 'p' -> Blocks.PINK_TERRACOTTA;
             default -> Blocks.AIR;
         };
     }

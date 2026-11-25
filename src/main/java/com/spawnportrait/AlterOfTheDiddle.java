@@ -7,9 +7,9 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -43,24 +43,21 @@ public final class AlterOfTheDiddle {
 
     private static final Item[] OFFERINGS = {
             Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS,
-            Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS,
             Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS,
             Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS,
             Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS,
             Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS,
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS,
             Items.TURTLE_HELMET,
-            Items.WOODEN_SWORD, Items.STONE_SWORD, Items.COPPER_SWORD, Items.IRON_SWORD,
+            Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD,
             Items.GOLDEN_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD,
-            Items.WOODEN_AXE, Items.STONE_AXE, Items.COPPER_AXE, Items.IRON_AXE,
+            Items.WOODEN_AXE, Items.STONE_AXE, Items.IRON_AXE,
             Items.GOLDEN_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE,
-            Items.WOODEN_SPEAR, Items.STONE_SPEAR, Items.COPPER_SPEAR, Items.IRON_SPEAR,
-            Items.GOLDEN_SPEAR, Items.DIAMOND_SPEAR, Items.NETHERITE_SPEAR,
             Items.BOW, Items.CROSSBOW, Items.TRIDENT, Items.MACE
     };
 
-    private static final BlockState BLACK = Blocks.CONCRETE.pick(DyeColor.BLACK).defaultBlockState();
-    private static final BlockState PINK = Blocks.CONCRETE.pick(DyeColor.PINK).defaultBlockState();
+    private static final BlockState BLACK = Blocks.BLACK_CONCRETE.defaultBlockState();
+    private static final BlockState PINK = Blocks.PINK_CONCRETE.defaultBlockState();
     private static final BlockState QUARTZ = Blocks.SMOOTH_QUARTZ.defaultBlockState();
     private static final BlockState CHISELED = Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState();
     private static final BlockState PILLAR = Blocks.QUARTZ_PILLAR.defaultBlockState()
@@ -173,10 +170,13 @@ public final class AlterOfTheDiddle {
                 .setMessage(1, Component.literal("Diddle"))
                 .setColor(DyeColor.PINK)
                 .setHasGlowingText(true);
+        Tag encoded = SignText.DIRECT_CODEC
+                .encodeStart(level.registryAccess().createSerializationContext(NbtOps.INSTANCE), text)
+                .getOrThrow();
         CompoundTag tag = new CompoundTag();
-        tag.store("front_text", SignText.DIRECT_CODEC, text);
+        tag.put("front_text", encoded);
         tag.putBoolean("is_waxed", true);
-        sign.loadCustomOnly(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
+        sign.loadCustomOnly(tag, level.registryAccess());
         sign.setChanged();
     }
 
@@ -198,7 +198,7 @@ public final class AlterOfTheDiddle {
     private static ItemStack randomOffering(WorldGenLevel level, RandomSource random) {
         ItemStack stack = new ItemStack(OFFERINGS[random.nextInt(OFFERINGS.length)]);
         level.registryAccess()
-                .lookupOrThrow(Registries.ENCHANTMENT)
+                .registryOrThrow(Registries.ENCHANTMENT)
                 .getRandom(random)
                 .ifPresent(enchant -> {
                     Enchantment value = enchant.value();

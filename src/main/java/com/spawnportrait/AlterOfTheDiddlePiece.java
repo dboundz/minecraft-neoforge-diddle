@@ -3,6 +3,7 @@ package com.spawnportrait;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -25,8 +26,10 @@ public class AlterOfTheDiddlePiece extends StructurePiece {
 
     public AlterOfTheDiddlePiece(CompoundTag tag) {
         super(ModStructures.ALTER_OF_THE_DIDDLE_PIECE.get(), tag);
-        this.origin = tag.read("Origin", BlockPos.CODEC).orElseGet(this.boundingBox::getCenter);
-        this.facing = tag.read("Facing", Direction.CODEC).orElse(Direction.SOUTH);
+        BlockPos readOrigin = NbtUtils.readBlockPos(tag, "Origin").orElse(null);
+        this.origin = readOrigin != null ? readOrigin : this.boundingBox.getCenter();
+        Direction readFacing = Direction.byName(tag.getString("Facing"));
+        this.facing = readFacing != null ? readFacing : Direction.SOUTH;
     }
 
     public BlockPos origin() {
@@ -59,8 +62,8 @@ public class AlterOfTheDiddlePiece extends StructurePiece {
 
     @Override
     protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
-        tag.store("Origin", BlockPos.CODEC, this.origin);
-        tag.store("Facing", Direction.CODEC, this.facing);
+        tag.put("Origin", NbtUtils.writeBlockPos(this.origin));
+        tag.putString("Facing", this.facing.getSerializedName());
     }
 
     @Override

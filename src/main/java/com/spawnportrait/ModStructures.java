@@ -1,7 +1,7 @@
 package com.spawnportrait;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -15,7 +15,7 @@ public final class ModStructures {
 
     public static final ResourceKey<Structure> ALTER_OF_THE_DIDDLE_KEY = ResourceKey.create(
             Registries.STRUCTURE,
-            Identifier.fromNamespaceAndPath(SpawnPortraitMod.MOD_ID, "alter_of_the_diddle")
+            ResourceLocation.fromNamespaceAndPath(SpawnPortraitMod.MOD_ID, "alter_of_the_diddle")
     );
 
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES =

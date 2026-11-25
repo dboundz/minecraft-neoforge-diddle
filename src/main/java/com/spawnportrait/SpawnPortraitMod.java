@@ -4,9 +4,13 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import com.spawnportrait.client.PortraitSoundPlayer;
+
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -24,9 +28,20 @@ public class SpawnPortraitMod {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("2").playToClient(
-                PlayPortraitSoundPayload.TYPE,
-                PlayPortraitSoundPayload.STREAM_CODEC
-        );
+        var registrar = event.registrar("1");
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            registrar.playToClient(
+                    PlayPortraitSoundPayload.TYPE,
+                    PlayPortraitSoundPayload.STREAM_CODEC,
+                    (payload, context) -> PortraitSoundPlayer.apply(payload.pos(), payload.playing())
+            );
+        } else {
+            registrar.playToClient(
+                    PlayPortraitSoundPayload.TYPE,
+                    PlayPortraitSoundPayload.STREAM_CODEC,
+                    (payload, context) -> {
+                    }
+            );
+        }
     }
 }

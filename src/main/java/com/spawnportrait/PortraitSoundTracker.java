@@ -78,8 +78,8 @@ public final class PortraitSoundTracker {
     }
 
     private static boolean chestHasItem(ServerLevel level, BlockPos chestPos) {
-        ChunkPos chestChunk = ChunkPos.containing(chestPos);
-        if (level.getChunkSource().getChunkNow(chestChunk.x(), chestChunk.z()) == null) {
+        ChunkPos chestChunk = new ChunkPos(chestPos);
+        if (level.getChunkSource().getChunkNow(chestChunk.x, chestChunk.z) == null) {
             return false;
         }
         return level.getBlockEntity(chestPos) instanceof ChestBlockEntity chest && !chest.isEmpty();
@@ -87,19 +87,19 @@ public final class PortraitSoundTracker {
 
     private static TrackedAlter findNearbyAlter(ServerLevel level, BlockPos playerPos) {
         Structure structure = level.registryAccess()
-                .lookupOrThrow(Registries.STRUCTURE)
-                .get(ModStructures.ALTER_OF_THE_DIDDLE_KEY)
+                .registryOrThrow(Registries.STRUCTURE)
+                .getHolder(ModStructures.ALTER_OF_THE_DIDDLE_KEY)
                 .map(holder -> holder.value())
                 .orElse(null);
         if (structure == null) {
             return null;
         }
 
-        ChunkPos center = ChunkPos.containing(playerPos);
+        ChunkPos center = new ChunkPos(playerPos);
         for (int dx = -CHUNK_RADIUS; dx <= CHUNK_RADIUS; dx++) {
             for (int dz = -CHUNK_RADIUS; dz <= CHUNK_RADIUS; dz++) {
-                int chunkX = center.x() + dx;
-                int chunkZ = center.z() + dz;
+                int chunkX = center.x + dx;
+                int chunkZ = center.z + dz;
                 if (level.getChunkSource().getChunkNow(chunkX, chunkZ) == null) {
                     continue;
                 }
